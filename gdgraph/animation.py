@@ -113,6 +113,12 @@ class RamerDouglasPeucker(manim.GraphScene):
         "max_point_color": manim.GREEN,
         "axes_color": manim.WHITE,
         "better_path_color": manim.PURPLE,
+        "epsilon_style": {
+            "color": manim.BLUE,
+            "stroke_opacity": 0,
+            "stroke_width": 0,
+            "fill_opacity": 0.50,
+        },
         "epsilon": 1,
     }
 
@@ -130,11 +136,22 @@ class RamerDouglasPeucker(manim.GraphScene):
         self.play(manim.ShowCreation(dots))
         self.play(manim.ShowCreation(lines))
 
-        self.ramer_douglas_peucker(points, epsilon=self.epsilon)
+        self.ramer_douglas_peucker_animated(points, epsilon=self.epsilon)
+
+        # for epsilon in np.arange(0, 5, 0.01):
+        # better_points = self.ramer_douglas_peucker(points, epsilon=epsilon)
+        # better_lines = manim.VGroup(*create_lines(better_points), color=self.better_path_color)
+        # epsilon_text = manim.TexMobject(f"\\epsilon = {epsilon}")
+        # epsilon_text.move_to((self.RIGHT + self.UP) * 3)
+        # self.add(better_lines, epsilon_text)
+        # self.wait(0.01)
+        # self.remove(better_lines, epsilon_text)
 
         self.wait()
 
-    def ramer_douglas_peucker(self, points: Sequence[Point], epsilon: N) -> Sequence[Point]:
+    def ramer_douglas_peucker_animated(
+        self, points: Sequence[Point], epsilon: N
+    ) -> Sequence[Point]:
         max_distance = 0
         max_index = 0
         max_point = None
@@ -145,10 +162,17 @@ class RamerDouglasPeucker(manim.GraphScene):
 
         line = manim.Line(first, last, color=self.point_color)
 
-        # epsilon_rectangle = manim.Rectangle(width=line.get_width(), height=epsilon)
-        # epsilon_rectangle.move_to(line)
+        epsilon_rect = manim.Rectangle(
+            width=line.get_width(), height=epsilon, **self.epsilon_style
+        )
 
-        self.add(first_dot, last_dot, line)
+        epsilon_rect.move_to(line)
+
+        delta_x, delta_y, *_ = last - first
+
+        epsilon_rect.rotate(np.arctan2(y_delta, x_delta))
+
+        self.add(first_dot, last_dot, line, epsilon_rect)
 
         for index, point in enumerate(points):
             distance = np.linalg.norm(
@@ -169,6 +193,8 @@ class RamerDouglasPeucker(manim.GraphScene):
 
         if max_point is not None:
             self.remove(dot)
+
+        self.remove(epsilon_rect)
 
         if max_distance > epsilon:
             self.remove(first_dot, last_dot, line)
