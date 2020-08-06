@@ -136,7 +136,13 @@ class RamerDouglasPeucker(manim.GraphScene):
         self.play(manim.ShowCreation(dots))
         self.play(manim.ShowCreation(lines))
 
+        self.to_remove = []
+
         self.ramer_douglas_peucker(points, epsilon=self.epsilon, animate=True)
+
+        self.wait(3)
+
+        self.remove(*self.to_remove)
 
         for epsilon in np.arange(0, 5, 0.01):
             better_points = self.ramer_douglas_peucker(points, epsilon=epsilon)
@@ -221,6 +227,7 @@ class RamerDouglasPeucker(manim.GraphScene):
         else:
             if animate:
                 for mobject in (first_dot, last_dot, line):
+                    self.to_remove.append(mobject)
                     mobject.set_color(self.better_path_color)
 
             return [first, last]
