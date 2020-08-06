@@ -136,43 +136,49 @@ class RamerDouglasPeucker(manim.GraphScene):
         self.play(manim.ShowCreation(dots))
         self.play(manim.ShowCreation(lines))
 
-        self.ramer_douglas_peucker_animated(points, epsilon=self.epsilon)
+        self.ramer_douglas_peucker(points, epsilon=self.epsilon, animate=True)
 
-        # for epsilon in np.arange(0, 5, 0.01):
-        # better_points = self.ramer_douglas_peucker(points, epsilon=epsilon)
-        # better_lines = manim.VGroup(*create_lines(better_points), color=self.better_path_color)
-        # epsilon_text = manim.TexMobject(f"\\epsilon = {epsilon}")
-        # epsilon_text.move_to((self.RIGHT + self.UP) * 3)
-        # self.add(better_lines, epsilon_text)
-        # self.wait(0.01)
-        # self.remove(better_lines, epsilon_text)
+        for epsilon in np.arange(0, 5, 0.01):
+            better_points = self.ramer_douglas_peucker(points, epsilon=epsilon)
+            better_lines = manim.VGroup(
+                *create_lines(better_points), color=self.better_path_color
+            )
+            epsilon_text = manim.TexMobject(f"\\epsilon = {epsilon}")
+            epsilon_text.move_to((self.RIGHT + self.UP) * 3)
+            self.add(better_lines, epsilon_text)
+            self.wait(0.01)
+            self.remove(better_lines, epsilon_text)
 
         self.wait()
 
-    def ramer_douglas_peucker_animated(
-        self, points: Sequence[Point], epsilon: N
+    def ramer_douglas_peucker(
+        self, points: Sequence[Point], epsilon: N, animate: bool = False
     ) -> Sequence[Point]:
         max_distance = 0
         max_index = 0
         max_point = None
 
         first, last = points[0], points[-1]
-        first_dot = manim.Dot(first, color=self.point_color)
-        last_dot = manim.Dot(last, color=self.point_color)
 
-        line = manim.Line(first, last, color=self.point_color)
+        if animate:
+            first_dot = manim.Dot(first, color=self.point_color)
+            last_dot = manim.Dot(last, color=self.point_color)
 
-        epsilon_rect = manim.Rectangle(
-            width=line.get_width(), height=epsilon, **self.epsilon_style
-        )
+            line = manim.Line(first, last, color=self.point_color)
 
-        epsilon_rect.move_to(line)
+            epsilon_rect = manim.Rectangle(
+                width=line.get_width(),
+                height=epsilon,
+                **self.epsilon_style,
+            )
 
-        delta_x, delta_y, *_ = last - first
+            epsilon_rect.move_to(line)
 
-        epsilon_rect.rotate(np.arctan2(y_delta, x_delta))
+            delta_x, delta_y, *_ = last - first
 
-        self.add(first_dot, last_dot, line, epsilon_rect)
+            epsilon_rect.rotate(np.arctan2(y_delta, x_delta))
+
+            self.add(first_dot, last_dot, line, epsilon_rect)
 
         for index, point in enumerate(points):
             distance = np.linalg.norm(
@@ -182,31 +188,40 @@ class RamerDouglasPeucker(manim.GraphScene):
             if distance > max_distance:
                 max_distance = distance
                 max_index = index
-                max_point = point
 
-        if max_point is not None:
-            dot = manim.Dot(max_point, color=self.max_point_color)
+                if animate:
+                    max_point = point
 
-            self.add(dot)
+        if animate:
+            if max_point is not None:
+                dot = manim.Dot(max_point, color=self.max_point_color)
 
-        self.wait(0.5)
+                self.add(dot)
 
-        if max_point is not None:
-            self.remove(dot)
+            self.wait(0.5)
 
-        self.remove(epsilon_rect)
+            if max_point is not None:
+                self.remove(dot)
+
+            self.remove(epsilon_rect)
 
         if max_distance > epsilon:
-            self.remove(first_dot, last_dot, line)
+            if animate:
+                self.remove(first_dot, last_dot, line)
 
-            recurse_left = self.ramer_douglas_peucker(points[: max_index + 1], epsilon)
-            recurse_right = self.ramer_douglas_peucker(points[max_index:], epsilon)
+            recurse_left = self.ramer_douglas_peucker(
+                points[: max_index + 1], epsilon, animate=animate
+            )
+            recurse_right = self.ramer_douglas_peucker(
+                points[max_index:], epsilon, animate=animate
+            )
 
             return recurse_left[:-1] + recurse_right
 
         else:
-            for mobject in (first_dot, last_dot, line):
-                mobject.set_color(self.better_path_color)
+            if animate:
+                for mobject in (first_dot, last_dot, line):
+                    mobject.set_color(self.better_path_color)
 
             return [first, last]
 
