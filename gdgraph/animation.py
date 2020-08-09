@@ -49,7 +49,6 @@ class LinearInterpolation(manim.GraphScene):
         "y_max": 2,
         "function_color": manim.BLUE,
         "graph_origin": manim.ORIGIN,
-        "axes_color": manim.WHITE,
         "graph_function": np.sin,
         "graph_name": "\\sin(x)",
         "step_to_color": {
@@ -70,11 +69,11 @@ class LinearInterpolation(manim.GraphScene):
 
         self.setup_axes(animate=True)
 
-        sine_graph = self.get_graph(self.graph_function, self.function_color)
+        some_graph = self.get_graph(self.graph_function, self.function_color)
 
-        sine_label = self.get_graph_label(sine_graph, label=self.graph_name)
+        some_label = self.get_graph_label(some_graph, label=self.graph_name)
 
-        self.play(manim.ShowCreation(sine_graph), manim.ShowCreation(sine_label))
+        self.play(manim.ShowCreation(some_graph), manim.ShowCreation(some_label))
 
         self.wait()
 
@@ -105,13 +104,16 @@ class LinearInterpolation(manim.GraphScene):
 
 class RamerDouglasPeucker(manim.GraphScene):
     CONFIG = {
+        "x_min": -1,
+        "x_max": 10,
+        "y_min": -5,
+        "y_max": 5,
         "points": (
             (1, 5), (2, 2), (3, 1), (4, 2), (5, 1), (6, 3), (7, 4), (8, 2), (9, 5)
         ),
         "lines_color": manim.RED,
         "point_color": manim.BLUE,
         "max_point_color": manim.GREEN,
-        "axes_color": manim.WHITE,
         "better_path_color": manim.PURPLE,
         "epsilon_style": {
             "color": manim.BLUE,
@@ -120,6 +122,11 @@ class RamerDouglasPeucker(manim.GraphScene):
             "fill_opacity": 0.50,
         },
         "epsilon": 1,
+        "epsilon_start": 0,
+        "epsilon_stop": 5,
+        "epsilon_step": 0.01,
+        "function_step": 0.01,
+        "function": lambda x: x/2 * np.sin(x),
     }
 
     def construct(self) -> None:
@@ -142,9 +149,15 @@ class RamerDouglasPeucker(manim.GraphScene):
 
         self.wait(3)
 
+        self.remove(dots, lines)
         self.remove(*self.to_remove)
 
-        for epsilon in np.arange(0, 5, 0.01):
+        points = [
+            self.coords_to_point(x, self.function(x))
+            for x in np.arange(0, self.x_max, self.function_step)
+        ]
+
+        for epsilon in np.arange(self.epsilon_start, self.epsilon_stop, self.epsilon_step):
             better_points = self.ramer_douglas_peucker(points, epsilon=epsilon)
             better_lines = manim.VGroup(
                 *create_lines(better_points), color=self.better_path_color
@@ -152,7 +165,7 @@ class RamerDouglasPeucker(manim.GraphScene):
             epsilon_text = manim.TexMobject(f"\\epsilon = {epsilon}")
             epsilon_text.move_to((self.RIGHT + self.UP) * 3)
             self.add(better_lines, epsilon_text)
-            self.wait(0.01)
+            self.wait(0.01 if epsilon else 3)
             self.remove(better_lines, epsilon_text)
 
         self.wait()
