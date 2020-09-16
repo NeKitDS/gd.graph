@@ -13,7 +13,7 @@ import click
 import gd
 import import_expression
 
-from gdgraph.utils import (
+from gd.graph.utils import (
     Line,
     N,
     Point,
@@ -74,14 +74,13 @@ def prepare_db_and_levels() -> Tuple[gd.api.Database, gd.api.LevelCollection]:
 def add_colors_and_background(
     editor: gd.api.Editor, color_id: int, color: int
 ) -> None:
-    background_color = gd.api.ColorChannel("BG").set_color(BACKGROUND_COLOR)
-    ground_color = gd.api.ColorChannel("GRND").set_color(GROUND_COLOR)
-    ground_2_color = gd.api.ColorChannel("GRND2").set_color(GROUND_2_COLOR)
-    graph_color = gd.api.ColorChannel(id=color_id).set_color(color)
+    colors = editor.get_colors()
 
-    editor.add_colors(
-        background_color, ground_color, ground_2_color, graph_color
-    )
+    colors.get("BG").set_color(BACKGROUND_COLOR)
+    colors.get("G").set_color(GROUND_COLOR)
+    colors.get("G2").set_color(GROUND_2_COLOR)
+
+    colors.add(gd.api.ColorChannel(id=color_id).set_color(color))
 
     editor.get_header().background = BACKGROUND_ID
 
@@ -121,7 +120,8 @@ def generate_objects(
             id=POINT_OBJECT_ID,
             x=x,
             y=y,
-            color_1=color_id,
+            color_1_id=color_id,
+            color_2_id=color_id,
             scale=POINT_OBJECT_SCALE,
         )
 
@@ -155,7 +155,8 @@ def generate_objects(
                         id=LINE_OBJECT_ID,
                         x=x,
                         y=y,
-                        color_1=color_id,
+                        color_1_id=color_id,
+                        color_2_id=color_id,
                         rotation=rotation,
                         scale=LINE_OBJECT_SCALE,
                     )
@@ -249,7 +250,7 @@ def generate_objects(
     type=bool,
     help="Whether last argument in given range should be included.",
 )
-def gdgraph(
+def main(
     color: str,
     func: str,
     level_name: str,
@@ -290,7 +291,7 @@ def gdgraph(
     print(f"Free color ID: {color_id}.")
 
     origin = gd.api.Object(
-        id=POINT_OBJECT_ID, x=0, y=0, color_1=color_id, scale=ORIGIN_SCALE
+        id=POINT_OBJECT_ID, x=0, y=0, color_1_id=color_id, color_2_id=color_id, scale=ORIGIN_SCALE
     )
 
     editor.add_objects(origin)
@@ -343,4 +344,4 @@ def gdgraph(
 
 
 if __name__ == "__main__":
-    gdgraph()
+    main()

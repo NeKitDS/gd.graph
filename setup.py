@@ -9,10 +9,10 @@ requirements = (
     (root / "requirements.txt").read_text("utf-8").strip().splitlines()
 )
 
-init = (root / "gdgraph" / "__init__.py").read_text("utf-8")
+text = (root / "gd" / "graph" / "__init__.py").read_text("utf-8")
 
 result = re.search(
-    r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', init, re.MULTILINE
+    r"^__version__\s*=\s*[\"']([^\"']*)[\"']", text, re.MULTILINE
 )
 
 if result is None:
@@ -32,7 +32,7 @@ setup(
         "Issue tracker": "https://github.com/NeKitDS/gd.graph/issues"
     },
     version=version,
-    packages=["gdgraph"],
+    packages=["gd", "gd.graph"],
     license="MIT",
     description="Plotting Graphs in Geometry Dash.",
     long_description=readme,
@@ -49,5 +49,5 @@ setup(
         "Natural Language :: English",
         "Operating System :: OS Independent",
     ],
-    entry_points={"console_scripts": ["gd.graph = gdgraph.__main__:gdgraph"]},
+    entry_points={"console_scripts": ["gd.graph = gd.graph.__main__:main"]},
 )

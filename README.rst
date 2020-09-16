@@ -57,7 +57,7 @@ You can invoke the command either like this:
 
 .. code:: sh
 
-    $ python -m gdgraph
+    $ python -m gd.graph
 
 Or like this:
 
@@ -89,9 +89,68 @@ Here is an example of plotting ``y = x`` function:
 
 And here is the result we get:
 
-.. image:: ./showcase.png
-    :target: ./showcase.png
-    :alt: Result
+.. image:: ./y=x.png
+    :target: ./y=x.png
+    :alt: y = x
+
+Or something more complex, ``y = sin(x)``:
+
+.. code:: sh
+
+    $ gd.graph --color=0xFF5555 --func=sin(x) --level-name="sine wave" --inclusive
+
+.. code:: text
+
+    Preparing database and levels...
+    Preparing the level and the editor...
+    Free color ID: 1.
+    Generating points...
+    Generating points to be skipped...
+    Applying Ramer-Douglas-Peucker (RDP) algorithm...
+    Generating objects...
+    Shifting objects to the right...
+    Saving...
+    Done. Objects used: 548.
+
+And the result:
+
+.. image:: ./y=sin(x).png
+    :target: ./y=sin(x).png
+    :alt: y = sin(x)
+
+Command Line Interface
+----------------------
+
+Here are all parameters ``gd.graph`` currently accepts:
+
+..code:: sh
+
+    $ gd.graph --help
+    Usage: gd.graph [OPTIONS]
+
+    Options:
+      -color, -c, --color TEXT        Color to use, written in hex format.
+      -func, -f, --func TEXT          Mathematical function to graph, like sin(x).
+      -level-name, -l, --level-name TEXT
+                                      Name of the level to save graph to.
+      -start, --start FLOAT           Value of the argument to start plotting
+                                      from.
+
+      -stop, --stop FLOAT             Value of the argument to stop plotting at.
+      -step, --step FLOAT             Value of the step to add to the argument.
+      -y-limit, -y, --y-limit FLOAT   Limit of absolute y value of any point.
+      -epsilon, -e, --epsilon FLOAT   Epsilon to use for decimating function a
+                                      curve to a similar curve with fewer points.
+
+      -scale, -s, --scale FLOAT       Scale constant used to enlarge the graph.
+      -rounding, -r, --rounding INTEGER
+                                      Number of decimal places to round each
+                                      argument to.
+
+      -inclusive, -i, --inclusive     Whether last argument in given range should
+                                      be included.
+
+      --help                          Show this message and exit.
 
 Authors
 -------
