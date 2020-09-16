@@ -123,9 +123,12 @@ Command Line Interface
 
 Here are all parameters ``gd.graph`` currently accepts:
 
-..code:: sh
+.. code:: sh
 
     $ gd.graph --help
+
+.. code:: text
+
     Usage: gd.graph [OPTIONS]
 
     Options:
