@@ -19,7 +19,7 @@ __all__ = (
     "perpendicular_distance",
     "douglas_peucker",
     "func_stub",
-    "iter_coorinates",
+    "iter_coordinates",
 )
 
 N = TypeVar("N", float, int)
@@ -116,7 +116,7 @@ def func_stub(input_value: N) -> Optional[N]:
     ...
 
 
-def iter_coorinates(
+def iter_coordinates(
     values: Iterable[N],
     func: Callable[[N], Optional[N]],
     scale: N = 1,

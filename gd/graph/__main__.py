@@ -18,7 +18,7 @@ from gd.graph.utils import (
     N,
     Point,
     douglas_peucker,
-    iter_coorinates,
+    iter_coordinates,
     number_range,
 )
 
@@ -58,8 +58,9 @@ def wrap_failsafe(function: Callable[..., T]) -> Callable[..., Optional[T]]:
     def inner(*args, **kwargs) -> Optional[T]:
         try:
             return function(*args, **kwargs)
+
         except Exception:  # noqa
-            return  # None
+            return None
 
     return inner
 
@@ -298,7 +299,7 @@ def main(
 
     add_colors_and_background(editor, color_id, color)
 
-    point_iterator = iter_coorinates(
+    point_iterator = iter_coordinates(
         number_range(
             start, stop, step, inclusive=inclusive, rounding=rounding
         ),

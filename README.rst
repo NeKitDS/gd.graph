@@ -14,7 +14,7 @@ gd.graph
     :alt: Required Python Versions
 
 .. image:: https://img.shields.io/pypi/status/gd.graph.svg
-    :target: https://github.com/NeKitDS/gd.graph
+    :target: https://github.com/nekitdev/gd.graph
     :alt: Project Development Status
 
 .. image:: https://img.shields.io/pypi/dm/gd.graph.svg
@@ -46,7 +46,7 @@ In order to install the library from source, you can do the following:
 
 .. code:: sh
 
-    $ git clone https://github.com/NeKitDS/gd.graph
+    $ git clone https://github.com/nekitdev/gd.graph
     $ cd gd.graph
     $ python -m pip install -U .
 
@@ -158,4 +158,4 @@ Here are all parameters ``gd.graph`` currently accepts:
 Authors
 -------
 
-This project is mainly developed by `NeKitDS <https://github.com/NeKitDS>`_.
+This project is mainly developed by `nekitdev <https://github.com/nekitdev>`_.
