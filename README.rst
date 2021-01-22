@@ -72,10 +72,12 @@ Here is an example of plotting ``y = x`` function:
 
 .. code:: sh
 
-    $ gd.graph --color=0x55FF55 --func=x --level-name=identity --y-limit=5 --inclusive
+    $ gd.graph --color=0x55FF55 --function=x --level-name=identity --y-limit=5 --inclusive
 
 .. code:: text
 
+    Processing...
+    Parsing and compiling function...
     Preparing database and levels...
     Preparing the level and the editor...
     Free color ID: 1.
@@ -85,7 +87,7 @@ Here is an example of plotting ``y = x`` function:
     Generating objects...
     Shifting objects to the right...
     Saving...
-    Done. Objects used: 286.
+    Done. Objects used: 286. Time spent: Ns.
 
 And here is the result we get:
 
@@ -97,10 +99,12 @@ Or something more complex, ``y = sin(x)``:
 
 .. code:: sh
 
-    $ gd.graph --color=0xFF5555 --func=sin(x) --level-name="sine wave" --inclusive
+    $ gd.graph -c 0xFF5555 -f sin(x) -l "sine wave" -i
 
 .. code:: text
 
+    Processing...
+    Parsing and compiling function...
     Preparing database and levels...
     Preparing the level and the editor...
     Free color ID: 1.
@@ -110,7 +114,7 @@ Or something more complex, ``y = sin(x)``:
     Generating objects...
     Shifting objects to the right...
     Saving...
-    Done. Objects used: 548.
+    Done. Objects used: 548. Time spent: Ns.
 
 And the result:
 
@@ -132,28 +136,27 @@ Here are all parameters ``gd.graph`` currently accepts:
     Usage: gd.graph [OPTIONS]
 
     Options:
-      -color, -c, --color TEXT        Color to use, written in hex format.
-      -func, -f, --func TEXT          Mathematical function to graph, like sin(x).
-      -level-name, -l, --level-name TEXT
-                                      Name of the level to save graph to.
-      -start, --start FLOAT           Value of the argument to start plotting
-                                      from.
+      -c, --color TEXT              Color to use, written in hex format.
+      -var, -v, --variable TEXT     Variable name to use, which should be valid as
+                                    an identifier. Default is x.
 
-      -stop, --stop FLOAT             Value of the argument to stop plotting at.
-      -step, --step FLOAT             Value of the step to add to the argument.
-      -y-limit, -y, --y-limit FLOAT   Limit of absolute y value of any point.
-      -epsilon, -e, --epsilon FLOAT   Epsilon to use for decimating function a
-                                      curve to a similar curve with fewer points.
+      -func, -f, --function TEXT    Mathematical function to graph, like sin(x).
+      -name, -l, --level-name TEXT  Name of the level to save graph to.
+      --start FLOAT                 Value of the argument to start plotting from.
+      --stop FLOAT                  Value of the argument to stop plotting at.
+      --step FLOAT                  Value of the step to add to the argument.
+      -y, --y-limit FLOAT           Limit of absolute y value of any point.
+      -e, --epsilon FLOAT           Epsilon to use for decimating function a curve
+                                    to a similar curve with fewer points.
 
-      -scale, -s, --scale FLOAT       Scale constant used to enlarge the graph.
-      -rounding, -r, --rounding INTEGER
-                                      Number of decimal places to round each
+      -s, --scale FLOAT             Scale constant used to enlarge the graph.
+      -r, --rounding INTEGER        Number of decimal places to round each
                                       argument to.
 
-      -inclusive, -i, --inclusive     Whether last argument in given range should
-                                      be included.
+      -i, --inclusive               Whether last argument in given range should be
+                                    included.
 
-      --help                          Show this message and exit.
+      --help                        Show this message and exit.
 
 Authors
 -------

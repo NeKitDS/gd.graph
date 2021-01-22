@@ -1,7 +1,7 @@
 from pathlib import Path
 import re
 
-from setuptools import setup
+from setuptools import setup  # type: ignore
 
 root = Path(__file__).parent
 
@@ -46,6 +46,7 @@ setup(
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
         "Natural Language :: English",
         "Operating System :: OS Independent",
     ],

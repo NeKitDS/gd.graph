@@ -1,40 +1,37 @@
-import math
+from math import sqrt
 
 from typing import (
     Callable,
-    Generator,
     Iterable,
+    Iterator,
     Optional,
     Sequence,
     Tuple,
-    TypeVar,
 )
 
 __all__ = (
-    "N",
     "Point",
     "Line",
     "number_range",
     "get_linear_formula",
     "perpendicular_distance",
     "douglas_peucker",
-    "func_stub",
+    "function_signature",
     "iter_coordinates",
 )
 
-N = TypeVar("N", float, int)
-Point = Tuple[N, N]
+Point = Tuple[float, float]
 Line = Tuple[Point, Point]
 
 
 def number_range(
-    start: N,
-    stop: Optional[N] = None,
-    step: N = 1,
+    start: float,
+    stop: Optional[float] = None,
+    step: float = 1,
     *,
     inclusive: bool = True,
     rounding: Optional[int] = 15,
-) -> Generator[N, None, None]:
+) -> Iterator[float]:
     """Return a generator over numbers in range from <start> to <stop> with <step>,
     optionally including <stop> if <inclusive> is True.
 
@@ -62,7 +59,7 @@ def number_range(
         yield stop
 
 
-def get_linear_formula(line: Line) -> Tuple[N, N, N]:
+def get_linear_formula(line: Line) -> Tuple[float, float, float]:
     """For points (x1, y1) and (x2, y2) find line ax + by + c = 0,
     such that they belong to it.
 
@@ -73,7 +70,7 @@ def get_linear_formula(line: Line) -> Tuple[N, N, N]:
     return y1 - y2, x2 - x1, x1 * y2 - x2 * y1
 
 
-def perpendicular_distance(point: Point, line: Line) -> N:
+def perpendicular_distance(point: Point, line: Line) -> float:
     """Calculate perpendicular distance from (x0, y0) point
     to (ax + by + c = 0) line (determined by two points).
     This function uses formula: |ax0 + by0 + c|/sqrt(a^2 + b^2)
@@ -81,11 +78,11 @@ def perpendicular_distance(point: Point, line: Line) -> N:
     a, b, c = get_linear_formula(line)
     x, y = point
 
-    return abs(a * x + b * y + c) / math.sqrt(a * a + b * b)
+    return abs(a * x + b * y + c) / sqrt(a * a + b * b)
 
 
 def douglas_peucker(
-    point_array: Sequence[Point], epsilon: N = 0.01
+    point_array: Sequence[Point], epsilon: float = 0.01
 ) -> Sequence[Point]:
     """Apply Ramer-Douglas-Peucker algorithm in order to decimate a curve
     composed of line segments to a similar curve with fewer points.
@@ -112,21 +109,20 @@ def douglas_peucker(
         return [first, last]
 
 
-def func_stub(input_value: N) -> Optional[N]:
+def function_signature(input_value: float) -> Optional[float]:
     ...
 
 
 def iter_coordinates(
-    values: Iterable[N],
-    func: Callable[[N], Optional[N]],
-    scale: N = 1,
-    shift: bool = False,
-) -> Generator[Point, None, None]:
+    values: Iterable[float],
+    function: Callable[[float], Optional[float]],
+    scale: float = 1,
+) -> Iterator[Point]:
     """Apply <func> for each value in <values>,
     multiplying input and output by <scale>.
     """
     for x in values:
-        y = func(x)
+        y = function(x)
 
         if y is not None:
             yield x * scale, y * scale

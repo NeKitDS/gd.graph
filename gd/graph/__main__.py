@@ -1,8 +1,9 @@
 import math
+import time
 from typing import (
     Callable,
-    Generator,
     Iterable,
+    Iterator,
     Optional,
     Sequence,
     Tuple,
@@ -15,7 +16,6 @@ import import_expression
 
 from gd.graph.utils import (
     Line,
-    N,
     Point,
     douglas_peucker,
     iter_coordinates,
@@ -42,7 +42,8 @@ SETUP = "from math import *"
 
 # THESE CAN ALSO BE CHANGED
 DEFAULT_COLOR = "0xFFFFFF"
-DEFAULT_FUNCTION = "x"
+DEFAULT_VARIABLE = "x"
+DEFAULT_FUNCTION = f"{DEFAULT_VARIABLE}"  # identity function
 DEFAULT_START = -5
 DEFAULT_STOP = 5
 DEFAULT_STEP = 0.001
@@ -65,11 +66,13 @@ def wrap_failsafe(function: Callable[..., T]) -> Callable[..., Optional[T]]:
     return inner
 
 
-def prepare_db_and_levels() -> Tuple[gd.api.Database, gd.api.LevelCollection]:
-    db = gd.api.save.load()
-    levels = db.load_my_levels()
+def prepare_database_and_levels() -> Tuple[
+    gd.api.Database, gd.api.LevelCollection
+]:
+    database = gd.api.save.load()
+    levels = database.get_created_levels()
 
-    return db, levels
+    return database, levels
 
 
 def add_colors_and_background(
@@ -98,20 +101,21 @@ def prepare_level_and_editor(
 
 
 def dump_entities(
-    db: gd.api.Database,
+    database: gd.api.Database,
     levels: gd.api.LevelCollection,
     level: gd.api.LevelAPI,
     editor: gd.api.Editor,
+    position: int = 0,
 ) -> None:
-    editor.dump_back()
-    levels.insert(0, level)
+    editor.to_callback()
+    levels.insert(position, level)
     levels.dump()
-    db.dump()
+    database.dump()
 
 
 def generate_objects(
-    points: Sequence[Point], color_id: int, skip: Iterable[N]
-) -> Generator[gd.api.Object, None, None]:
+    points: Sequence[Point], color_id: int, skip: Iterable[float]
+) -> Iterator[gd.api.Object]:
     previous_point: Optional[Point] = None
 
     for point in points:
@@ -168,13 +172,22 @@ def generate_objects(
 @click.command()
 @click.option(
     "--color",
-    "-color",
     "-c",
     default=DEFAULT_COLOR,
     help="Color to use, written in hex format.",
 )
 @click.option(
-    "--func",
+    "--variable",
+    "-var",
+    "-v",
+    default=DEFAULT_VARIABLE,
+    help=(
+        f"Variable name to use, which should be valid as an identifier. "
+        f"Default is {DEFAULT_VARIABLE}."
+    ),
+)
+@click.option(
+    "--function",
     "-func",
     "-f",
     default=DEFAULT_FUNCTION,
@@ -182,35 +195,31 @@ def generate_objects(
 )
 @click.option(
     "--level-name",
-    "-level-name",
+    "-name",
     "-l",
     prompt="Level name",
     help="Name of the level to save graph to.",
 )
 @click.option(
     "--start",
-    "-start",
     default=DEFAULT_START,
     type=float,
     help="Value of the argument to start plotting from.",
 )
 @click.option(
     "--stop",
-    "-stop",
     default=DEFAULT_STOP,
     type=float,
     help="Value of the argument to stop plotting at.",
 )
 @click.option(
     "--step",
-    "-step",
     default=DEFAULT_STEP,
     type=float,
     help="Value of the step to add to the argument.",
 )
 @click.option(
     "--y-limit",
-    "-y-limit",
     "-y",
     default=DEFAULT_Y_LIMIT,
     type=float,
@@ -218,7 +227,6 @@ def generate_objects(
 )
 @click.option(
     "--epsilon",
-    "-epsilon",
     "-e",
     default=DEFAULT_EPSILON,
     type=float,
@@ -229,7 +237,6 @@ def generate_objects(
 )
 @click.option(
     "--scale",
-    "-scale",
     "-s",
     default=DEFAULT_SCALE,
     type=float,
@@ -237,7 +244,6 @@ def generate_objects(
 )
 @click.option(
     "--rounding",
-    "-rounding",
     "-r",
     default=DEFAULT_ROUNDING,
     type=int,
@@ -245,7 +251,6 @@ def generate_objects(
 )
 @click.option(
     "--inclusive",
-    "-inclusive",
     "-i",
     is_flag=True,
     type=bool,
@@ -253,7 +258,8 @@ def generate_objects(
 )
 def main(
     color: str,
-    func: str,
+    variable: str,
+    function: str,
     level_name: str,
     start: float,
     stop: float,
@@ -264,24 +270,35 @@ def main(
     rounding: int,
     inclusive: bool,
 ) -> None:
+    time_start = time.perf_counter()
+
+    print("Processing...")
+
     try:
         color = int(color.replace("#", "0x"), 16)
+
     except ValueError:
         return click.echo(f"Can not parse color: {color!r}.")
 
+    print("Parsing and compiling function...")
+
     try:
         environment = {}
+
         exec(SETUP, environment)
-        func = import_expression.eval(f"lambda x: {func}", environment)
+
+        function = import_expression.eval(
+            f"lambda {variable}: {function}", environment
+        )
 
     except SyntaxError:
-        return click.echo(f"Can not parse function: {func!r}.")
+        return click.echo(f"Can not parse function: {function!r}.")
 
     y_limit *= GRID_UNITS
 
     print("Preparing database and levels...")
 
-    db, levels = prepare_db_and_levels()
+    database, levels = prepare_database_and_levels()
 
     print("Preparing the level and the editor...")
 
@@ -292,7 +309,12 @@ def main(
     print(f"Free color ID: {color_id}.")
 
     origin = gd.api.Object(
-        id=POINT_OBJECT_ID, x=0, y=0, color_1_id=color_id, color_2_id=color_id, scale=ORIGIN_SCALE
+        id=POINT_OBJECT_ID,
+        x=0,
+        y=0,
+        color_1_id=color_id,
+        color_2_id=color_id,
+        scale=ORIGIN_SCALE,
     )
 
     editor.add_objects(origin)
@@ -303,7 +325,7 @@ def main(
         number_range(
             start, stop, step, inclusive=inclusive, rounding=rounding
         ),
-        wrap_failsafe(func),
+        wrap_failsafe(function),
         scale,
     )
 
@@ -339,9 +361,23 @@ def main(
 
     print("Saving...")
 
-    dump_entities(db, levels, level, editor)
+    dump_entities(database, levels, level, editor)
 
-    print(f"Done. Objects used: {len(editor.get_objects())}.")
+    time_stop = time.perf_counter()
+
+    time_spent = time_stop - time_start
+
+    if time_spent > 1:
+        time_spent = round(time_spent, 2)
+        time_string = f"{time_spent}s"
+
+    else:
+        time_spent = round(time_spent * 1000, 2)
+        time_string = f"{time_spent}ms"
+
+    print(
+        f"Done. Objects used: {len(editor.get_objects())}. Time spent: {time_string}."
+    )
 
 
 if __name__ == "__main__":
