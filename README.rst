@@ -7,7 +7,7 @@ gd.graph
 
 .. image:: https://img.shields.io/pypi/v/gd.graph.svg
     :target: https://pypi.python.org/pypi/gd.graph
-    :alt: PyPI Library Version
+    :alt: Library Version
 
 .. image:: https://img.shields.io/pypi/pyversions/gd.graph.svg
     :target: https://pypi.python.org/pypi/gd.graph
@@ -15,15 +15,15 @@ gd.graph
 
 .. image:: https://img.shields.io/pypi/status/gd.graph.svg
     :target: https://github.com/nekitdev/gd.graph
-    :alt: Project Development Status
+    :alt: Development Status
 
-.. image:: https://img.shields.io/pypi/dm/gd.graph.svg
+.. image:: https://img.shields.io/pypi/dw/gd.graph.svg
     :target: https://pypi.python.org/pypi/gd.graph
-    :alt: Library Downloads/Month
+    :alt: Library Downloads / Week
 
-.. image:: https://img.shields.io/endpoint.svg?url=https%3A%2F%2Fshieldsio-patreon.herokuapp.com%2Fnekit%2Fpledges
-    :target: https://patreon.com/nekit
-    :alt: Patreon Page [Support]
+.. image:: https://app.codacy.com/project/badge/Grade/e791035c646345a88423fd62fb9a6b26
+    :target: https://www.codacy.com/gh/nekitdev/gd.graph
+    :alt: Code Quality
 
 gd.graph is a library that implements a CLI for plotting graphs in Geometry Dash.
 
@@ -37,10 +37,10 @@ To install the library, you can just run the following command:
 .. code:: sh
 
     # Linux/OS X
-    python3 -m pip install -U gd.graph
+    python3 -m pip install --upgrade gd.graph
 
     # Windows
-    py -3 -m pip install -U gd.graph
+    py -3 -m pip install --upgrade gd.graph
 
 In order to install the library from source, you can do the following:
 
@@ -48,7 +48,7 @@ In order to install the library from source, you can do the following:
 
     $ git clone https://github.com/nekitdev/gd.graph
     $ cd gd.graph
-    $ python -m pip install -U .
+    $ python -m pip install --upgrade .
 
 Invoking
 --------
@@ -99,7 +99,7 @@ Or something more complex, ``y = sin(x)``:
 
 .. code:: sh
 
-    $ gd.graph -c 0xFF5555 -f sin(x) -l "sine wave" -i
+    $ gd.graph -c 0xFF5555 -f sin(x) -l "wave" -i
 
 .. code:: text
 

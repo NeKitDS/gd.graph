@@ -1,7 +1,12 @@
 import math
 import time
+
+from operator import attrgetter as get_attr_factory
+
 from typing import (
+    Any,
     Callable,
+    Dict,
     Iterable,
     Iterator,
     Optional,
@@ -11,14 +16,16 @@ from typing import (
 )
 
 import click
+import import_expression  # type: ignore
+
 import gd
-import import_expression
+import gd.api
 
 from gd.graph.utils import (
     Line,
     Point,
     douglas_peucker,
-    iter_coordinates,
+    generate_coordinates,
     number_range,
 )
 
@@ -52,11 +59,12 @@ DEFAULT_SCALE = GRID_UNITS
 DEFAULT_ROUNDING = 15
 DEFAULT_Y_LIMIT = 90
 
+get_x = get_attr_factory("x")
 T = TypeVar("T")
 
 
 def wrap_failsafe(function: Callable[..., T]) -> Callable[..., Optional[T]]:
-    def inner(*args, **kwargs) -> Optional[T]:
+    def inner(*args: Any, **kwargs: Any) -> Optional[T]:
         try:
             return function(*args, **kwargs)
 
@@ -141,7 +149,6 @@ def generate_objects(
             if length > POINT_OBJECT_DIAMETER and not any(
                 x1 < skip_x < x2 for skip_x in skip
             ):
-
                 rotation = math.degrees(math.atan(a / b))
 
                 dx, dy = (x2 - x1) / length, (y2 - y1) / length
@@ -275,7 +282,7 @@ def main(
     print("Processing...")
 
     try:
-        color = int(color.replace("#", "0x"), 16)
+        color_value = int(color.replace("#", "0x"), 16)
 
     except ValueError:
         return click.echo(f"Can not parse color: {color!r}.")
@@ -283,11 +290,11 @@ def main(
     print("Parsing and compiling function...")
 
     try:
-        environment = {}
+        environment: Dict[str, Any] = {}
 
         exec(SETUP, environment)
 
-        function = import_expression.eval(
+        function_to_call = import_expression.eval(
             f"lambda {variable}: {function}", environment
         )
 
@@ -306,6 +313,11 @@ def main(
 
     color_id = editor.get_free_color_id()
 
+    if color_id is None:
+        print("Can not find free color ID to use.")
+
+        exit(1)
+
     print(f"Free color ID: {color_id}.")
 
     origin = gd.api.Object(
@@ -319,13 +331,13 @@ def main(
 
     editor.add_objects(origin)
 
-    add_colors_and_background(editor, color_id, color)
+    add_colors_and_background(editor, color_id, color_value)
 
-    point_iterator = iter_coordinates(
+    point_iterator = generate_coordinates(
         number_range(
             start, stop, step, inclusive=inclusive, rounding=rounding
         ),
-        wrap_failsafe(function),
+        wrap_failsafe(function_to_call),
         scale,
     )
 
@@ -344,17 +356,15 @@ def main(
 
     print("Applying Ramer-Douglas-Peucker (RDP) algorithm...")
 
-    points = douglas_peucker(points, epsilon)
+    actual_points = douglas_peucker(points, epsilon)
 
     print("Generating objects...")
 
-    editor.objects.extend(generate_objects(points, color_id, skip))
+    editor.objects.extend(generate_objects(actual_points, color_id, skip))
 
     print("Shifting objects to the right...")
 
-    lowest_x = abs(
-        min((gd_object.x for gd_object in editor.get_objects()), default=0)
-    )
+    lowest_x = abs(min(map(get_x, editor.get_objects()), default=0.0))
 
     for gd_object in editor.get_objects():
         gd_object.move(x=lowest_x)
@@ -376,7 +386,8 @@ def main(
         time_string = f"{time_spent}ms"
 
     print(
-        f"Done. Objects used: {len(editor.get_objects())}. Time spent: {time_string}."
+        f"Done. Objects used: {len(editor.get_objects())}. "
+        f"Time spent: {time_string}."
     )
 
 
